@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: -4526442968949603855}
   m_Layer: 0
   m_Name: ammo-rifle 32px_0
-  m_TagString: Untagged
+  m_TagString: bullet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

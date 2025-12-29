@@ -10,9 +10,13 @@ public class Shooting : MonoBehaviour
     public GameObject flashEffect;
     public Camera cam;
     [SerializeField] private bool enemy = true;
-    
+
+    public PlayerHealth playerHealth;
+    private int health2;
     void Update()
     {
+        health2 = playerHealth.health;
+        Debug.Log(health2);
         if (Input.GetMouseButtonDown(0))
         {
             Shoot();

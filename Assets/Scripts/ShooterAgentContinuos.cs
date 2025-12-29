@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
@@ -7,8 +8,9 @@ using Unity.MLAgents.Actuators;
 public class ShooterAgentContinuous : Agent
 {
     public Rigidbody rb;
-    public Transform enemy;
     public Camera agentCamera;
+
+    public List<Transform> enemies = new List<Transform>();
 
     public GameObject bulletPrefab;
     public Transform firePoint;
@@ -22,12 +24,14 @@ public class ShooterAgentContinuous : Agent
 
     private Vector3 startPos;
     private Quaternion startRot;
+    private Vector3 lastPosition;
 
     public override void Initialize()
     {
         rb = GetComponent<Rigidbody>();
         startPos = transform.position;
         startRot = transform.rotation;
+        lastPosition = transform.position;
     }
 
     public override void OnEpisodeBegin()
@@ -38,39 +42,54 @@ public class ShooterAgentContinuous : Agent
         rb.velocity = Vector3.zero;
         transform.position = startPos;
         transform.rotation = startRot;
+        lastPosition = transform.position;
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
+        Vector3 delta = transform.position - lastPosition;
+        lastPosition = transform.position;
+        sensor.AddObservation(delta.x);
+        sensor.AddObservation(delta.z);
+
         float wallDist = 1f;
         if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, rayLength))
             wallDist = hit.distance / rayLength;
-
         sensor.AddObservation(wallDist);
+
         sensor.AddObservation(health / 100f);
         sensor.AddObservation(ammo / 10f);
 
-        bool visible = IsEnemyVisible();
-        sensor.AddObservation(visible ? 1f : 0f);
+        bool visible = false;
+        Vector3 dir = Vector3.zero;
+        float minD = float.MaxValue;
 
-        if (visible)
-            sensor.AddObservation((enemy.position - transform.position).normalized);
-        else
-            sensor.AddObservation(Vector3.zero);
+        foreach (Transform e in enemies)
+        {
+            if (!IsVisible(e)) continue;
+
+            float d = Vector3.Distance(transform.position, e.position);
+            if (d < minD)
+            {
+                minD = d;
+                dir = (e.position - transform.position).normalized;
+                visible = true;
+            }
+        }
+
+        sensor.AddObservation(visible ? 1f : 0f);
+        sensor.AddObservation(visible ? dir : Vector3.zero);
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        // Continuous actions
-        // [0] Move forward/backward  ∈ [-1, 1]
-        // [1] Turn left/right        ∈ [-1, 1]
-        // [2] Shoot trigger          ∈ [0, 1]
-
         float move = actions.ContinuousActions[0];
         float turn = actions.ContinuousActions[1];
         float shoot = actions.ContinuousActions[2];
 
-        rb.MovePosition(transform.position + transform.forward * move * moveSpeed * Time.fixedDeltaTime);
+        rb.MovePosition(transform.position +
+                        transform.forward * move * moveSpeed * Time.fixedDeltaTime);
+
         transform.Rotate(Vector3.up, turn * turnSpeed * Time.fixedDeltaTime);
 
         if (shoot > 0.5f && ammo > 0)
@@ -88,9 +107,9 @@ public class ShooterAgentContinuous : Agent
         }
     }
 
-    bool IsEnemyVisible()
+    bool IsVisible(Transform t)
     {
-        Vector3 v = agentCamera.WorldToViewportPoint(enemy.position);
+        Vector3 v = agentCamera.WorldToViewportPoint(t.position);
         return v.z > 0 && v.x > 0 && v.x < 1 && v.y > 0 && v.y < 1;
     }
 }

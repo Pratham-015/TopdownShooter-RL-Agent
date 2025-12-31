@@ -7,6 +7,7 @@ using Unity.MLAgents.Actuators;
 [RequireComponent(typeof(Rigidbody))]
 public class ShooterAgentContinuous : Agent
 {
+    [Header("Game Objects")]
     public Rigidbody rb;
     public Camera agentCamera;
 
@@ -14,10 +15,17 @@ public class ShooterAgentContinuous : Agent
 
     public GameObject bulletPrefab;
     public Transform firePoint;
+    
+    [Header("Rewards")]
+    public float deathPenalty = -1.0f;
+    public float timePenalty = -0.001f;
 
+    [Header("Parameters")]
     public float moveSpeed = 5f;
     public float turnSpeed = 120f;
     public float rayLength = 10f;
+    public int maxHealth = 100;
+    public int maxAmmo = 10;
 
     public int health = 100;
     public int ammo = 10;
@@ -36,8 +44,8 @@ public class ShooterAgentContinuous : Agent
 
     public override void OnEpisodeBegin()
     {
-        health = 100;
-        ammo = 10;
+        health = maxHealth;
+        ammo = maxAmmo;
 
         rb.velocity = Vector3.zero;
         transform.position = startPos;
@@ -49,16 +57,16 @@ public class ShooterAgentContinuous : Agent
     {
         Vector3 delta = transform.position - lastPosition;
         lastPosition = transform.position;
-        sensor.AddObservation(delta.x);
-        sensor.AddObservation(delta.z);
+        sensor.AddObservation(delta.x);         // 1 float
+        sensor.AddObservation(delta.z);         // 1 float
 
         float wallDist = 1f;
         if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, rayLength))
             wallDist = hit.distance / rayLength;
-        sensor.AddObservation(wallDist);
+        sensor.AddObservation(wallDist);        // 1 float
 
-        sensor.AddObservation(health / 100f);
-        sensor.AddObservation(ammo / 10f);
+        sensor.AddObservation(health / maxHealth);   // 1 float
+        sensor.AddObservation(ammo / maxAmmo);      // 1 float
 
         bool visible = false;
         Vector3 dir = Vector3.zero;
@@ -77,10 +85,9 @@ public class ShooterAgentContinuous : Agent
             }
         }
 
-        sensor.AddObservation(visible ? 1f : 0f);
-        sensor.AddObservation(visible ? dir : Vector3.zero);
+        sensor.AddObservation(visible ? 1f : 0f);               // 1 float
+        sensor.AddObservation(visible ? dir : Vector3.zero);    // 1 float
     }
-
     public override void OnActionReceived(ActionBuffers actions)
     {
         float move = actions.ContinuousActions[0];
@@ -98,11 +105,11 @@ public class ShooterAgentContinuous : Agent
             ammo--;
         }
 
-        AddReward(-0.001f);
+        AddReward(timePenalty);         
 
         if (health <= 0)
         {
-            AddReward(-1f);
+            AddReward(deathPenalty);
             EndEpisode();
         }
     }

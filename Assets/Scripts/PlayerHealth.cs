@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour
 {
+    public int maxHealth=100;
+    public int bulletDamage=5;
     public int health = 0;
     public int ammo = 10;
     public Rigidbody2D rb;
@@ -13,17 +15,12 @@ public class PlayerHealth : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        health = 100;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
+        health = maxHealth;
     }
 
     void OnCollisionEnter2D(Collision2D col){
         if(col.collider.tag == "bullet"){
-            TakeDamage(5);
+            TakeDamage(bulletDamage);
         }
 
     }

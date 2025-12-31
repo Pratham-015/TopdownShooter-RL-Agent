@@ -139,8 +139,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3948897512906989290}
-  - component: {fileID: 7398335813404786436}
   - component: {fileID: 5883048354598564163}
+  - component: {fileID: 7398335813404786436}
+  - component: {fileID: 6367513992676941744}
   - component: {fileID: 7911160766493699408}
   m_Layer: 0
   m_Name: Player
@@ -170,21 +171,6 @@ Transform:
   - {fileID: 1340852999450094501}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7398335813404786436
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 710513210172219077}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44a5cebadd0b20440871e84e26cf767f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speed: 5
-  rb: {fileID: 5883048354598564163}
-  cam: {fileID: 0}
 --- !u!50 &5883048354598564163
 Rigidbody2D:
   serializedVersion: 4
@@ -212,6 +198,37 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
+--- !u!114 &7398335813404786436
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 710513210172219077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44a5cebadd0b20440871e84e26cf767f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 5
+  rb: {fileID: 5883048354598564163}
+  cam: {fileID: 0}
+--- !u!114 &6367513992676941744
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 710513210172219077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ed38c48623dd2349ae023e960556200, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  health: 0
+  ammo: 10
+  rb: {fileID: 0}
+  healthBar: {fileID: 0}
 --- !u!114 &7911160766493699408
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -228,6 +245,9 @@ MonoBehaviour:
   bulletPrefab: {fileID: 6156241762426880258, guid: 960486e50152955419130442324abfa7, type: 3}
   bulletForce: 20
   flashEffect: {fileID: 6875843752443508452, guid: 803ba4217a92b1d41b13a0f20caa8a8b, type: 3}
+  cam: {fileID: 0}
+  enemy: 1
+  playerHealth: {fileID: 0}
 --- !u!1 &5478934941846132415
 GameObject:
   m_ObjectHideFlags: 0

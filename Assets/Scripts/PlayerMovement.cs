@@ -10,14 +10,7 @@ public class PlayerMovement : MonoBehaviour
 
     public Camera cam;
     Vector2 mousePose;
-    // Update is called once per frame
-    void Awake()
-    {
-        if (cam == null)
-        {
-            return;
-        }
-    }
+    
     void Update()
     {
         movement.x = Input.GetAxisRaw("Horizontal");

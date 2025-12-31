@@ -4,16 +4,30 @@ using UnityEngine;
 
 public class EnemyShooter : MonoBehaviour
 {
+    [Header("Objects")]
     public Transform firePoint;
     public GameObject bulletPrefab;
+
+    [Header("Bullet Parameters")]
+    public float initialBulletDelay=2f;
     public float bulletForce = 20f;
+    public float bulletCooldown=0.1f;
+    private bool canShoot=false;
+
+    [Header("Visual Objects")]
     public GameObject flashEffect;
     public Camera cam;
     [SerializeField] private bool enemy = true;
-    
+
+    void Start()
+    {
+        Invoke(nameof(EnableShooting),initialBulletDelay);
+    }
     void Update()
     {
-        Invoke("Shoot", 2f);
+        if (!canShoot) return;
+        
+        StartCoroutine(ShootWithDelay(bulletCooldown));
         // If cam is null, perform a raycast from firepoint forward to infinity
         if (enemy == true)
         {
@@ -33,12 +47,17 @@ public class EnemyShooter : MonoBehaviour
         }
     }
 
-    // IEnumerator ShootWithDelay(float DelayTime)
-    // {
-    //     yield return new WaitForSeconds(DelayTime);
-    //     Shoot();
-    // }
-
+    void EnableShooting()
+    {
+        canShoot=true;
+    }
+    IEnumerator ShootWithDelay(float DelayTime)
+    {
+        canShoot=false;
+        yield return new WaitForSeconds(DelayTime);
+        Shoot();
+        canShoot=true;
+    }
     void Shoot()
     {
         Quaternion flashRotation = firePoint.rotation * Quaternion.Euler(0f, 0f, -90f);

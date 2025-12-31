@@ -4,9 +4,14 @@ using UnityEngine;
 
 public class Shooting : MonoBehaviour
 {
+    [Header("Objects")]
     public Transform firePoint;
     public GameObject bulletPrefab;
+
+    [Header("Bullet Parameters")]
     public float bulletForce = 20f;
+
+    [Header("Visual Objects")]
     public GameObject flashEffect;
     public Camera cam;
     [SerializeField] private bool enemy = true;
@@ -16,7 +21,7 @@ public class Shooting : MonoBehaviour
     void Update()
     {
         health2 = playerHealth.health;
-        Debug.Log(health2);
+        //Debug.Log(health2);
         if (Input.GetMouseButtonDown(0))
         {
             Shoot();

@@ -5,14 +5,13 @@ using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour
 {
-    public int maxHealth=100;
-    public int bulletDamage=5;
-    public int health = 0;
+    public float maxHealth=100f;
+    public float bulletDamage=5f;
+    public float health = 0f;
     public int ammo = 10;
     public Rigidbody2D rb;
     [SerializeField] public Image healthBar;
 
-    // Start is called before the first frame update
     void Start()
     {
         health = maxHealth;
@@ -21,16 +20,25 @@ public class PlayerHealth : MonoBehaviour
     void OnCollisionEnter2D(Collision2D col){
         if(col.collider.tag == "bullet"){
             TakeDamage(bulletDamage);
+            Debug.Log(health);
+            if (health <= 0)
+            {
+                Death();
+            }
         }
 
     }
-
-    void TakeDamage(int damage)
+    void TakeDamage(float damage)
     {
         health -= damage;
         health = Mathf.Clamp(health, 0, 100);
         Vector3 scale = healthBar.rectTransform.localScale;
-        scale.x = 4* health / 100f;
+        scale.x = health / maxHealth;
         healthBar.rectTransform.localScale = scale;
+    }
+    void Death()
+    {
+        Destroy(gameObject);
+        Debug.Log(gameObject.name+" Died");
     }
 }

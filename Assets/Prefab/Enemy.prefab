@@ -80,6 +80,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ed38c48623dd2349ae023e960556200, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxHealth: 100
+  bulletDamage: 5
   health: 0
   ammo: 0
   rb: {fileID: 85295680338021795}
@@ -98,7 +100,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   firePoint: {fileID: 7416911065404019603}
   bulletPrefab: {fileID: 6156241762426880258, guid: 960486e50152955419130442324abfa7, type: 3}
+  initialBulletDelay: 2
   bulletForce: 20
+  bulletCooldown: 0.1
   flashEffect: {fileID: 6875843752443508452, guid: 803ba4217a92b1d41b13a0f20caa8a8b, type: 3}
   cam: {fileID: 0}
   enemy: 1
@@ -112,7 +116,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7416911065404019603}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Fire Point
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -145,7 +149,7 @@ GameObject:
   - component: {fileID: 8876458197082853906}
   - component: {fileID: 8170329207571583629}
   m_Layer: 0
-  m_Name: Skins_68
+  m_Name: Backpack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -275,7 +279,7 @@ GameObject:
   - component: {fileID: 9096825563039599241}
   - component: {fileID: 3185249292900585858}
   m_Layer: 0
-  m_Name: Skins_69
+  m_Name: Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -425,7 +429,7 @@ GameObject:
   - component: {fileID: 2353717234835905246}
   - component: {fileID: 7324858952854815211}
   m_Layer: 0
-  m_Name: Skins_71
+  m_Name: Left Arm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -509,7 +513,7 @@ GameObject:
   - component: {fileID: 1574080329271894132}
   - component: {fileID: 4273307666058704543}
   m_Layer: 0
-  m_Name: Skins_70
+  m_Name: Right Arm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -594,7 +598,7 @@ GameObject:
   - component: {fileID: 7646895190114808313}
   - component: {fileID: 8078826334923865339}
   m_Layer: 0
-  m_Name: Weapons_3
+  m_Name: Rifle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

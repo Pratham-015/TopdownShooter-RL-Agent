@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3324810108616889922}
   - component: {fileID: 7170599867740972331}
   m_Layer: 0
-  m_Name: Skins_68
+  m_Name: Backpack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -225,6 +225,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ed38c48623dd2349ae023e960556200, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxHealth: 100
+  bulletDamage: 5
   health: 0
   ammo: 10
   rb: {fileID: 0}
@@ -260,7 +262,7 @@ GameObject:
   - component: {fileID: 533709151378972889}
   - component: {fileID: 240730957267438398}
   m_Layer: 0
-  m_Name: Skins_69
+  m_Name: Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -378,7 +380,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1340852999450094501}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Fire Point
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -411,7 +413,7 @@ GameObject:
   - component: {fileID: 3406639169810265454}
   - component: {fileID: 2451787733177182548}
   m_Layer: 0
-  m_Name: Weapons_3
+  m_Name: Rifle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -540,7 +542,7 @@ GameObject:
   - component: {fileID: 8912917528500622575}
   - component: {fileID: 3604951497784858548}
   m_Layer: 0
-  m_Name: Skins_71
+  m_Name: Left Arm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -624,7 +626,7 @@ GameObject:
   - component: {fileID: 1924584497769133237}
   - component: {fileID: 7656587794079909272}
   m_Layer: 0
-  m_Name: Skins_70
+  m_Name: Right Arm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

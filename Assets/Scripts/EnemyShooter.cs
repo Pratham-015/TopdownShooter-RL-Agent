@@ -29,22 +29,22 @@ public class EnemyShooter : MonoBehaviour
         
         StartCoroutine(ShootWithDelay(bulletCooldown));
         // If cam is null, perform a raycast from firepoint forward to infinity
-        if (enemy == true)
+        /*if (enemy == true)
         {
             Vector2 direction = -firePoint.up; // Forward direction from firepoint
             RaycastHit2D hit = Physics2D.Raycast(firePoint.position, direction, Mathf.Infinity);
             
-            if (hit.collider != null)
+            if (hit.collider != null && hit.collider.tag!="Boundary")
             {
-                Debug.Log($"Raycast hit: {hit.collider.name} at distance {hit.distance}");
+                Debug.Log($"Enemy Raycast hit: {hit.collider.name} at distance {hit.distance}");
                 Debug.DrawRay(firePoint.position, direction * hit.distance, Color.red, 2f);
             }
             else
             {
-                Debug.Log("Raycast hit nothing");
+                Debug.Log("Enemy Raycast hit nothing");
                 Debug.DrawRay(firePoint.position, direction * 1000f, Color.yellow, 2f);
             }
-        }
+        }*/
     }
 
     void EnableShooting()

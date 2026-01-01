@@ -87,6 +87,7 @@ public class ShooterAgentContinuous : Agent
 
         sensor.AddObservation(visible ? 1f : 0f);               // 1 float
         sensor.AddObservation(visible ? dir : Vector3.zero);    // 1 float
+        // Direction of nearest enemy
     }
     public override void OnActionReceived(ActionBuffers actions)
     {

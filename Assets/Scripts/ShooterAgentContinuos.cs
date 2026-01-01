@@ -8,7 +8,7 @@ using Unity.MLAgents.Actuators;
 public class ShooterAgentContinuous : Agent
 {
     [Header("Game Objects")]
-    public Rigidbody rb;
+    public Rigidbody2D rb;
     public Camera agentCamera;
 
     public List<Transform> enemies = new List<Transform>();
@@ -36,7 +36,7 @@ public class ShooterAgentContinuous : Agent
 
     public override void Initialize()
     {
-        rb = GetComponent<Rigidbody>();
+        rb = GetComponent<Rigidbody2D>();
         startPos = transform.position;
         startRot = transform.rotation;
         lastPosition = transform.position;

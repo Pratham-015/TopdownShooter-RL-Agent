@@ -74,11 +74,10 @@ public class Shooting : MonoBehaviour
     IEnumerator Reload()
     {
         isReloading=true;
-        Debug.Log("Started Reloading");
+        ammoText.text="Reloading";
         yield return new WaitForSeconds(reloadTime);
         ammo=maxAmmo;
         UpdateAmmoUI();
-        Debug.Log("Ended Reloading");
         isReloading=false;
     }
     void UpdateAmmoUI()

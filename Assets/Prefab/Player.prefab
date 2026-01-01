@@ -140,12 +140,12 @@ GameObject:
   m_Component:
   - component: {fileID: 3948897512906989290}
   - component: {fileID: 5883048354598564163}
-  - component: {fileID: 7398335813404786436}
   - component: {fileID: 6367513992676941744}
+  - component: {fileID: 7398335813404786436}
   - component: {fileID: 7911160766493699408}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -183,8 +183,8 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDrag: 0
+  m_Mass: 5
+  m_LinearDrag: 10
   m_AngularDrag: 0.05
   m_GravityScale: 0
   m_Material: {fileID: 0}
@@ -198,21 +198,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
---- !u!114 &7398335813404786436
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 710513210172219077}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44a5cebadd0b20440871e84e26cf767f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speed: 5
-  rb: {fileID: 5883048354598564163}
-  cam: {fileID: 0}
 --- !u!114 &6367513992676941744
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -228,9 +213,24 @@ MonoBehaviour:
   maxHealth: 100
   bulletDamage: 5
   health: 0
-  ammo: 10
   rb: {fileID: 0}
   healthBar: {fileID: 0}
+  healthText: {fileID: 0}
+--- !u!114 &7398335813404786436
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 710513210172219077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44a5cebadd0b20440871e84e26cf767f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 5
+  rb: {fileID: 5883048354598564163}
+  cam: {fileID: 0}
 --- !u!114 &7911160766493699408
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -245,11 +245,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   firePoint: {fileID: 1340852999450094501}
   bulletPrefab: {fileID: 6156241762426880258, guid: 960486e50152955419130442324abfa7, type: 3}
-  bulletForce: 20
+  bulletForce: 15
+  ammo: 0
+  maxAmmo: 10
+  reloadTime: 3
   flashEffect: {fileID: 6875843752443508452, guid: 803ba4217a92b1d41b13a0f20caa8a8b, type: 3}
   cam: {fileID: 0}
+  ammoText: {fileID: 0}
+  ammoBar: {fileID: 0}
   enemy: 1
-  playerHealth: {fileID: 0}
 --- !u!1 &5478934941846132415
 GameObject:
   m_ObjectHideFlags: 0
@@ -411,7 +415,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1943585697197417272}
   - component: {fileID: 3406639169810265454}
-  - component: {fileID: 2451787733177182548}
   m_Layer: 0
   m_Name: Rifle
   m_TagString: Untagged
@@ -486,51 +489,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!61 &2451787733177182548
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7125334408459248635}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0.32399392}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.68, y: 3.36}
-    newSize: {x: 0.68, y: 3.36}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 0.68, y: 2.7120118}
-  m_EdgeRadius: 0
 --- !u!1 &8666761384769872686
 GameObject:
   m_ObjectHideFlags: 0

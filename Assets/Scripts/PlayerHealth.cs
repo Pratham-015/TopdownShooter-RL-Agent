@@ -6,6 +6,11 @@ using TMPro;
 
 public class PlayerHealth : MonoBehaviour
 {
+    public enum gameMode
+    {
+        SelfPlay,
+        Training
+    }
     public int maxHealth=100;
     public int bulletDamage=5;
     public int health = 0;
@@ -21,7 +26,7 @@ public class PlayerHealth : MonoBehaviour
     void OnCollisionEnter2D(Collision2D col){
         if(col.collider.tag == "bullet"){
             TakeDamage(bulletDamage);
-            Debug.Log(health);
+            //Debug.Log(health);
             if (health <= 0)
             {
                 Death();
@@ -47,6 +52,6 @@ public class PlayerHealth : MonoBehaviour
     void Death()
     {
         Destroy(gameObject);
-        Debug.Log(gameObject.name+" Died");
+        //Debug.Log(gameObject.name+" Died");
     }
 }

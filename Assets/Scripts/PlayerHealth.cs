@@ -2,15 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class PlayerHealth : MonoBehaviour
 {
-    public float maxHealth=100f;
-    public float bulletDamage=5f;
-    public float health = 0f;
-    public int ammo = 10;
+    public int maxHealth=100;
+    public int bulletDamage=5;
+    public int health = 0;
     public Rigidbody2D rb;
-    [SerializeField] public Image healthBar;
+    public Image healthBar;
+    public TMP_Text healthText;
 
     void Start()
     {
@@ -28,13 +29,20 @@ public class PlayerHealth : MonoBehaviour
         }
 
     }
-    void TakeDamage(float damage)
+    void TakeDamage(int damage)
     {
         health -= damage;
         health = Mathf.Clamp(health, 0, 100);
+
+        UpdateHealthUI();
+    }
+    void UpdateHealthUI()
+    {
         Vector3 scale = healthBar.rectTransform.localScale;
-        scale.x = health / maxHealth;
+        scale.x = (float)health / maxHealth;
         healthBar.rectTransform.localScale = scale;
+
+        healthText.text=gameObject.name+" Health";
     }
     void Death()
     {

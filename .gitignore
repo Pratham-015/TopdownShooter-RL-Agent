@@ -30,3 +30,9 @@ Library/PackageCache/
 ############################
 .DS_Store
 Thumbs.db
+
+############################
+# Virtual Environments
+############################
+venv/
+env/

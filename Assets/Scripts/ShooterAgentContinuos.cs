@@ -4,42 +4,49 @@ using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.Actuators;
 
-[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Rigidbody2D))]
 public class ShooterAgentContinuous : Agent
 {
-    [Header("Game Objects")]
+    [Header("Components")]
     public Rigidbody2D rb;
     public Camera agentCamera;
 
-    public List<Transform> enemies = new List<Transform>();
-
+    [Header("Game Objects")]
+    public List<Transform> enemies;
     public GameObject bulletPrefab;
     public Transform firePoint;
     
     [Header("Rewards")]
     public float deathPenalty = -1.0f;
     public float timePenalty = -0.001f;
+    public float hitReward = 0.5f;
+    public float randomShootingPenalty=-0.01f;
 
     [Header("Parameters")]
     public float moveSpeed = 5f;
     public float turnSpeed = 120f;
     public float rayLength = 10f;
-    public int maxHealth = 100;
-    public int maxAmmo = 10;
 
     public int health = 100;
+    public int maxHealth = 100;
     public int ammo = 10;
+    public int maxAmmo = 10;
 
-    private Vector3 startPos;
+    public float bulletForce=15f;
+    public float shootCooldown=0.25f;
+
+    bool visible=false;
+    private Vector2 startPos;
     private Quaternion startRot;
-    private Vector3 lastPosition;
+    private Vector2 lastPosition;
+    private float lastShootTime;
 
     public override void Initialize()
     {
         rb = GetComponent<Rigidbody2D>();
-        startPos = transform.position;
+        startPos = rb.position;
         startRot = transform.rotation;
-        lastPosition = transform.position;
+        lastPosition = rb.position;
     }
 
     public override void OnEpisodeBegin()
@@ -47,28 +54,29 @@ public class ShooterAgentContinuous : Agent
         health = maxHealth;
         ammo = maxAmmo;
 
-        rb.velocity = Vector3.zero;
-        transform.position = startPos;
+        rb.velocity = Vector2.zero;
+        rb.position = startPos;
         transform.rotation = startRot;
-        lastPosition = transform.position;
+        lastPosition = rb.position;
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        Vector3 delta = transform.position - lastPosition;
-        lastPosition = transform.position;
-        sensor.AddObservation(delta.x);         // 1 float
-        sensor.AddObservation(delta.z);         // 1 float
+        Vector2 delta = rb.position - lastPosition;
+        lastPosition = rb.position;
+        sensor.AddObservation(delta.x/moveSpeed);         // 1 float
+        sensor.AddObservation(delta.y/moveSpeed);         // 1 float
 
         float wallDist = 1f;
-        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, rayLength))
+        RaycastHit2D hit = Physics2D.Raycast(rb.position, transform.up, rayLength);
+        if (hit.collider!=null)
             wallDist = hit.distance / rayLength;
         sensor.AddObservation(wallDist);        // 1 float
 
-        sensor.AddObservation(health / maxHealth);   // 1 float
-        sensor.AddObservation(ammo / maxAmmo);      // 1 float
+        sensor.AddObservation((float)health / maxHealth);   // 1 float
+        sensor.AddObservation((float)ammo / maxAmmo);      // 1 float
 
-        bool visible = false;
+        visible = false;
         Vector3 dir = Vector3.zero;
         float minD = float.MaxValue;
 
@@ -76,7 +84,7 @@ public class ShooterAgentContinuous : Agent
         {
             if (!IsVisible(e)) continue;
 
-            float d = Vector3.Distance(transform.position, e.position);
+            float d = Vector2.Distance(transform.position, e.position);
             if (d < minD)
             {
                 minD = d;
@@ -85,36 +93,57 @@ public class ShooterAgentContinuous : Agent
             }
         }
 
-        sensor.AddObservation(visible ? 1f : 0f);               // 1 float
-        sensor.AddObservation(visible ? dir : Vector3.zero);    // 1 float
+        sensor.AddObservation(visible ? 1f : 0f);       // 1 float
+        sensor.AddObservation(visible ? dir.x : 0f);    // 1 float
+        sensor.AddObservation(visible ? dir.y : 0f);    // 1 float
         // Direction of nearest enemy
     }
     public override void OnActionReceived(ActionBuffers actions)
     {
-        float move = actions.ContinuousActions[0];
-        float turn = actions.ContinuousActions[1];
+        float move = Mathf.Clamp(actions.ContinuousActions[0], 0f, 1f);
+        // move = 0 (doesn't move) or 1 (moves)
+        float turn = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
+        // turn = -1 (clockwise) or 0 (doesn't turn) or 1 (anti-clockwise)
         float shoot = actions.ContinuousActions[2];
+        // shoot = 0 (doesn't shoot) or 1 (shoots)
 
         rb.MovePosition(transform.position +
-                        transform.forward * move * moveSpeed * Time.fixedDeltaTime);
+                        transform.up * move * moveSpeed * Time.fixedDeltaTime);
 
-        transform.Rotate(Vector3.up, turn * turnSpeed * Time.fixedDeltaTime);
+        transform.Rotate(Vector3.forward, turn * turnSpeed * Time.fixedDeltaTime);
 
-        if (shoot > 0.5f && ammo > 0)
+        if (shoot > 0.5f && ammo > 0 && Time.time - lastShootTime > shootCooldown)
         {
-            Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+            AgentShoot();
             ammo--;
+            lastShootTime = Time.time;
+
+            if (!visible)
+            {
+                AddReward(randomShootingPenalty);
+                // Discourages agent to shoot when enemy is not visible
+            }
         }
 
-        AddReward(timePenalty);         
-
+        AddReward(timePenalty);
         if (health <= 0)
         {
             AddReward(deathPenalty);
             EndEpisode();
         }
     }
+    void AgentShoot()
+    {
+        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+        Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();   
+        bullet.GetComponent<Bullet>().Init(this);
 
+        rb.AddForce(firePoint.up * bulletForce , ForceMode2D.Impulse);
+    }
+    public void OnEnemyHit()
+    {
+        AddReward(hitReward);
+    }
     bool IsVisible(Transform t)
     {
         Vector3 v = agentCamera.WorldToViewportPoint(t.position);

@@ -66,6 +66,6 @@ public class EnemyShooter : MonoBehaviour
         
         GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();   
-        rb.AddForce(firePoint.up * bulletForce *-1, ForceMode2D.Impulse);
+        rb.AddForce(firePoint.up * bulletForce , ForceMode2D.Impulse);
     }
 }

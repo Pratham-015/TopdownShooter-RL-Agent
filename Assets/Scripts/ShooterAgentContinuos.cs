@@ -12,10 +12,17 @@ public class ShooterAgentContinuous : Agent
     public Camera agentCamera;
 
     [Header("Game Objects")]
-    public List<Transform> enemies;
-    public Dictionary<Transform,Vector2> enemiesSpawnMap;
     public GameObject bulletPrefab;
     public Transform firePoint;
+    
+    [Header("Enemy Spawning")]
+    public GameObject enemyPrefab;
+    public int enemiesPerEpisode=5;
+    public float minSpawnDistance = 8f;
+    public float maxSpawnDistance = 12f;
+    public int maxSpawnTries=30;
+    private List<Transform> enemies = new List<Transform>();
+
 
     [Header("Episode Limits")]
     public int maxEpisodeSteps=1500;
@@ -24,8 +31,8 @@ public class ShooterAgentContinuous : Agent
     [Header("Rewards")]
     public float deathPenalty = -1.0f;
     public float timePenalty = -0.001f;
-    public float hitReward = 0.5f;
-    public float randomShootingPenalty=-0.01f;
+    public float hitReward = 1.0f;
+    public float enemyReward = 10.0f;
 
     [Header("Parameters")]
     public float moveSpeed = 5f;
@@ -34,8 +41,8 @@ public class ShooterAgentContinuous : Agent
 
     public int health = 100;
     public int maxHealth = 100;
-    public int ammo = 10;
-    public int maxAmmo = 10;
+    //public int ammo = 10;
+    //public int maxAmmo = 10;
 
     public float bulletForce=15f;
     public float shootCooldown=0.25f;
@@ -59,44 +66,33 @@ public class ShooterAgentContinuous : Agent
         startRot = transform.rotation;
         lastPosition = rb.position;
 
-        enemiesSpawnMap= new Dictionary<Transform, Vector2>();
-        UpdateEnemyList();
-        UpdateEnemyStartPos();
     }
 
     public override void OnEpisodeBegin()
     {
         if (episodeStepsAlive > 0)
         {
-            totalStepsAlive += episodeStepsAlive;
             totalEpisodes++;
+            totalStepsAlive+=episodeStepsAlive;
         }
-        if (totalEpisodes % 10 == 0)
+        episodeStepCount=0;
+        episodeStepsAlive = 0;
+
+        if (totalEpisodes>0 && totalEpisodes % 10 == 0)
         {
             LogTensorBoardStats();
         }
-        episodeStepsAlive = 0;
+        
 
         health = maxHealth;
-        ammo = maxAmmo;
+        //ammo = maxAmmo;
 
         rb.velocity = Vector2.zero;
         rb.position = startPos;
         transform.rotation = startRot;
         lastPosition = rb.position;
 
-        episodeStepCount=0;
-
-        foreach (var pair in enemiesSpawnMap)
-        {
-            Transform e=pair.Key;
-            e.position=pair.Value;
-            e.gameObject.SetActive(true);
-            if (!enemies.Contains(e))
-            {
-                enemies.Add(e);
-            }
-        }
+        SpawnEnemies();
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -113,15 +109,20 @@ public class ShooterAgentContinuous : Agent
         sensor.AddObservation(wallDist);        // 1 float
 
         sensor.AddObservation((float)health / maxHealth);   // 1 float
-        sensor.AddObservation((float)ammo / maxAmmo);      // 1 float
+        //sensor.AddObservation((float)ammo / maxAmmo);      // 1 float
 
         bool visible = false;
         Vector3 dir = Vector3.zero;
         float minD = float.MaxValue;
 
-        foreach (Transform e in enemies)
+        for (int i = enemies.Count - 1; i >= 0; i--)
         {
-            if (!IsVisible(e)) continue;
+            Transform e = enemies[i];
+            if (e == null || !e.gameObject.activeInHierarchy)
+            {
+                enemies.RemoveAt(i);
+                continue;
+            }
 
             float d = Vector2.Distance(transform.position, e.position);
             if (d < minD)
@@ -144,27 +145,23 @@ public class ShooterAgentContinuous : Agent
 
         float move = Mathf.Clamp(actions.ContinuousActions[0], 0f, 1f);
         // move = 0 (doesn't move) or 1 (moves)
-        float turn = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
+        float turnL = Mathf.Clamp(actions.ContinuousActions[1], 0f, 1f);
+        float turnR = Mathf.Clamp(actions.ContinuousActions[2], 0f, 1f);
         // turn = -1 (clockwise) or 0 (doesn't turn) or 1 (anti-clockwise)
-        float shoot = actions.ContinuousActions[2];
+        float shoot = actions.ContinuousActions[3];
         // shoot = 0 (doesn't shoot) or 1 (shoots)
 
-        rb.MovePosition(transform.position +
+        rb.MovePosition(transform.position -
                         transform.up * move * moveSpeed * Time.fixedDeltaTime);
 
-        transform.Rotate(Vector3.forward, turn * turnSpeed * Time.fixedDeltaTime);
+        transform.Rotate(Vector3.forward, (turnL-turnR) * turnSpeed * Time.fixedDeltaTime);
 
-        if (shoot > 0.5f && ammo > 0 && Time.time - lastShootTime > shootCooldown)
+        if (shoot > 0.5f && Time.time - lastShootTime > shootCooldown)
         {
             AgentShoot();
-            ammo--;
+            //if (ammo>0) ammo--;
             lastShootTime = Time.time;
 
-            if (!IsAnyEnemyVisible())
-            {
-                AddReward(randomShootingPenalty);
-                // Discourages agent to shoot when enemy is not visible
-            }
         }
 
         AddReward(timePenalty);
@@ -174,6 +171,10 @@ public class ShooterAgentContinuous : Agent
             EndEpisode();
         }
 
+        if (enemies.Count == 0)
+        {
+            EndEpisode();
+        }
         if (episodeStepCount >= maxEpisodeSteps)
         {
             EndEpisode();
@@ -185,44 +186,83 @@ public class ShooterAgentContinuous : Agent
 
         GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();   
-        bullet.GetComponent<Bullet>().Init(this);
+        bullet.GetComponent<Bullet>().InitAgentBullet(this);
 
         rb.AddForce(firePoint.up * bulletForce , ForceMode2D.Impulse);
     }
     public void OnEnemyHit(Transform enemy)
     {
-        totalHits++;
+        if (!enemies.Contains(enemy)) return;
 
+        PlayerHealth h=enemy.gameObject.GetComponent<PlayerHealth>();
+        if (h==null) return;
+
+        totalHits++;
         AddReward(hitReward);
-        enemy.gameObject.SetActive(false);
-        enemies.Remove(enemy);
+
+        if (h.health <= 0)
+        {
+            enemies.Remove(enemy);
+            enemy.gameObject.SetActive(false);
+            AddReward(enemyReward);
+        }
     }
     bool IsVisible(Transform t)
     {
+        if (agentCamera==null || t==null) return false;
         Vector3 v = agentCamera.WorldToViewportPoint(t.position);
-        return v.z > 0 && v.x > 0 && v.x < 1 && v.y > 0 && v.y < 1;
-    }
-    bool IsAnyEnemyVisible()
-    {
-        foreach (Transform e in enemies)
-            if (IsVisible(e)) return true;
-        return false;
-    }
+        if (v.z<=0f || v.x<=0f || v.y<=0f || v.x>=1f || v.y>=1f) return false;
+        
+        Vector2 origin = rb.position;
+        Vector2 direction = (Vector2)t.position - origin;
+        float distance = direction.magnitude;
 
-    void UpdateEnemyStartPos()
+        RaycastHit2D hit = Physics2D.Raycast(origin,direction.normalized,
+            distance,LayerMask.GetMask("Wall", "Enemy"));
+
+        // Visible only if first hit is the enemy
+        return hit.collider != null && hit.collider.transform == t;
+    }
+    void SpawnEnemies()
     {
-        enemiesSpawnMap.Clear();
-        foreach (Transform o in enemies)
+        ClearEnemies();
+
+        for (int i = 0; i < enemiesPerEpisode; i++)
         {
-            enemiesSpawnMap[o]=(o.position);
+            Vector2 spawnPos = GetValidEnemySpawnPosition();
+            float randomAngle = Random.Range(0f, 360f);
+
+            GameObject enemy = Instantiate( enemyPrefab,spawnPos,
+                Quaternion.Euler(0f, 0f, randomAngle));
+
+            enemies.Add(enemy.transform);
         }
     }
-    void UpdateEnemyList()
+    Vector2 GetValidEnemySpawnPosition()
     {
+        for (int i = 0; i < maxSpawnTries; i++)
+        {
+            Vector2 dir = Random.insideUnitCircle.normalized;
+            float dist = Random.Range(minSpawnDistance, maxSpawnDistance);
+            Vector2 candidate = startPos + dir * dist;
+
+            Collider2D hit = Physics2D.OverlapCircle(candidate, 0.4f, LayerMask.GetMask("Wall"));
+
+            if (hit == null)
+                return candidate;
+        }
+        
+        return startPos + Random.insideUnitCircle.normalized * maxSpawnDistance;
+    }
+
+    void ClearEnemies()
+    {
+        foreach (Transform e in enemies)
+        {
+            if (e != null)
+                Destroy(e.gameObject);
+        }
         enemies.Clear();
-        GameObject[] objs = GameObject.FindGameObjectsWithTag("Enemy");
-        foreach (var o in objs)
-            enemies.Add(o.transform);
     }
     void LogTensorBoardStats()
     {

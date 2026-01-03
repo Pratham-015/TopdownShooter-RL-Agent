@@ -2,22 +2,58 @@
     "Shooter": {
         "checkpoints": [
             {
-                "steps": 0,
-                "file_path": "results/Shoot_v1/Shooter/Shooter-0.onnx",
-                "reward": null,
-                "creation_time": 1767420443.232709,
+                "steps": 40765,
+                "file_path": "results/Shoot_v1/Shooter/Shooter-40765.onnx",
+                "reward": -2.034867927713214,
+                "creation_time": 1767435739.0394413,
                 "auxillary_file_paths": [
-                    "results/Shoot_v1/Shooter/Shooter-0.pt"
+                    "results/Shoot_v1/Shooter/Shooter-40765.pt"
+                ]
+            },
+            {
+                "steps": 71564,
+                "file_path": "results/Shoot_v1/Shooter/Shooter-71564.onnx",
+                "reward": -1.9997999954223633,
+                "creation_time": 1767437225.8767593,
+                "auxillary_file_paths": [
+                    "results/Shoot_v1/Shooter/Shooter-71564.pt"
+                ]
+            },
+            {
+                "steps": 73164,
+                "file_path": "results/Shoot_v1/Shooter/Shooter-73164.onnx",
+                "reward": -2.0,
+                "creation_time": 1767437468.5944448,
+                "auxillary_file_paths": [
+                    "results/Shoot_v1/Shooter/Shooter-73164.pt"
+                ]
+            },
+            {
+                "steps": 74364,
+                "file_path": "results/Shoot_v1/Shooter/Shooter-74364.onnx",
+                "reward": -2.0,
+                "creation_time": 1767437572.3818824,
+                "auxillary_file_paths": [
+                    "results/Shoot_v1/Shooter/Shooter-74364.pt"
+                ]
+            },
+            {
+                "steps": 85564,
+                "file_path": "results/Shoot_v1/Shooter/Shooter-85564.onnx",
+                "reward": -2.0,
+                "creation_time": 1767437860.7284226,
+                "auxillary_file_paths": [
+                    "results/Shoot_v1/Shooter/Shooter-85564.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 0,
+            "steps": 85564,
             "file_path": "results/Shoot_v1/Shooter.onnx",
-            "reward": null,
-            "creation_time": 1767420443.232709,
+            "reward": -2.0,
+            "creation_time": 1767437860.7284226,
             "auxillary_file_paths": [
-                "results/Shoot_v1/Shooter/Shooter-0.pt"
+                "results/Shoot_v1/Shooter/Shooter-85564.pt"
             ]
         }
     },

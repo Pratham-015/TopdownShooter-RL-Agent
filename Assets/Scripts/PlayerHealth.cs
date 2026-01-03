@@ -6,13 +6,8 @@ using TMPro;
 
 public class PlayerHealth : MonoBehaviour
 {
-    public enum gameMode
-    {
-        SelfPlay,
-        Training
-    }
     public int maxHealth=100;
-    public int bulletDamage=5;
+    public int bulletDamage=10;
     public int health = 0;
     public Rigidbody2D rb;
     public Image healthBar;
@@ -39,7 +34,10 @@ public class PlayerHealth : MonoBehaviour
         health -= damage;
         health = Mathf.Clamp(health, 0, 100);
 
-        UpdateHealthUI();
+        if (healthBar!=null && healthText != null)
+        {
+            UpdateHealthUI();   
+        }
     }
     void UpdateHealthUI()
     {

@@ -211,7 +211,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 100
-  bulletDamage: 5
+  bulletDamage: 10
   health: 0
   rb: {fileID: 0}
   healthBar: {fileID: 0}

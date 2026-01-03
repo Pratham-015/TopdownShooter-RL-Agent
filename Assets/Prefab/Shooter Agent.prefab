@@ -88,17 +88,16 @@ MonoBehaviour:
   enemies: []
   bulletPrefab: {fileID: 6156241762426880258, guid: 960486e50152955419130442324abfa7, type: 3}
   firePoint: {fileID: 0}
+  maxEpisodeSteps: 1500
   deathPenalty: -1
   timePenalty: -0.001
-  hitReward: 0.5
-  randomShootingPenalty: -0.01
+  hitReward: 1
+  enemyReward: 10
   moveSpeed: 5
   turnSpeed: 120
   rayLength: 10
   health: 100
   maxHealth: 100
-  ammo: 10
-  maxAmmo: 10
   bulletForce: 15
   shootCooldown: 0.25
 --- !u!114 &7234652927518201924

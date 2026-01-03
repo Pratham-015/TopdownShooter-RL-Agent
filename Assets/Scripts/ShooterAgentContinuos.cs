@@ -13,8 +13,13 @@ public class ShooterAgentContinuous : Agent
 
     [Header("Game Objects")]
     public List<Transform> enemies;
+    public Dictionary<Transform,Vector2> enemiesSpawnMap;
     public GameObject bulletPrefab;
     public Transform firePoint;
+
+    [Header("Episode Limits")]
+    public int maxEpisodeSteps=1500;
+    private int episodeStepCount;
     
     [Header("Rewards")]
     public float deathPenalty = -1.0f;
@@ -35,7 +40,13 @@ public class ShooterAgentContinuous : Agent
     public float bulletForce=15f;
     public float shootCooldown=0.25f;
 
-    bool visible=false;
+    [Header("Metric")]
+    private int totalShots = 0;
+    private int totalHits = 0;
+    private int totalEpisodes = 0;
+    private int totalStepsAlive = 0;
+    private int episodeStepsAlive = 0;
+
     private Vector2 startPos;
     private Quaternion startRot;
     private Vector2 lastPosition;
@@ -47,10 +58,25 @@ public class ShooterAgentContinuous : Agent
         startPos = rb.position;
         startRot = transform.rotation;
         lastPosition = rb.position;
+
+        enemiesSpawnMap= new Dictionary<Transform, Vector2>();
+        UpdateEnemyList();
+        UpdateEnemyStartPos();
     }
 
     public override void OnEpisodeBegin()
     {
+        if (episodeStepsAlive > 0)
+        {
+            totalStepsAlive += episodeStepsAlive;
+            totalEpisodes++;
+        }
+        if (totalEpisodes % 10 == 0)
+        {
+            LogTensorBoardStats();
+        }
+        episodeStepsAlive = 0;
+
         health = maxHealth;
         ammo = maxAmmo;
 
@@ -58,6 +84,19 @@ public class ShooterAgentContinuous : Agent
         rb.position = startPos;
         transform.rotation = startRot;
         lastPosition = rb.position;
+
+        episodeStepCount=0;
+
+        foreach (var pair in enemiesSpawnMap)
+        {
+            Transform e=pair.Key;
+            e.position=pair.Value;
+            e.gameObject.SetActive(true);
+            if (!enemies.Contains(e))
+            {
+                enemies.Add(e);
+            }
+        }
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -76,7 +115,7 @@ public class ShooterAgentContinuous : Agent
         sensor.AddObservation((float)health / maxHealth);   // 1 float
         sensor.AddObservation((float)ammo / maxAmmo);      // 1 float
 
-        visible = false;
+        bool visible = false;
         Vector3 dir = Vector3.zero;
         float minD = float.MaxValue;
 
@@ -100,6 +139,9 @@ public class ShooterAgentContinuous : Agent
     }
     public override void OnActionReceived(ActionBuffers actions)
     {
+        episodeStepCount++;
+        episodeStepsAlive++;
+
         float move = Mathf.Clamp(actions.ContinuousActions[0], 0f, 1f);
         // move = 0 (doesn't move) or 1 (moves)
         float turn = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
@@ -118,7 +160,7 @@ public class ShooterAgentContinuous : Agent
             ammo--;
             lastShootTime = Time.time;
 
-            if (!visible)
+            if (!IsAnyEnemyVisible())
             {
                 AddReward(randomShootingPenalty);
                 // Discourages agent to shoot when enemy is not visible
@@ -131,22 +173,72 @@ public class ShooterAgentContinuous : Agent
             AddReward(deathPenalty);
             EndEpisode();
         }
+
+        if (episodeStepCount >= maxEpisodeSteps)
+        {
+            EndEpisode();
+        }
     }
     void AgentShoot()
     {
+        totalShots++;
+
         GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();   
         bullet.GetComponent<Bullet>().Init(this);
 
         rb.AddForce(firePoint.up * bulletForce , ForceMode2D.Impulse);
     }
-    public void OnEnemyHit()
+    public void OnEnemyHit(Transform enemy)
     {
+        totalHits++;
+
         AddReward(hitReward);
+        enemy.gameObject.SetActive(false);
+        enemies.Remove(enemy);
     }
     bool IsVisible(Transform t)
     {
         Vector3 v = agentCamera.WorldToViewportPoint(t.position);
         return v.z > 0 && v.x > 0 && v.x < 1 && v.y > 0 && v.y < 1;
     }
+    bool IsAnyEnemyVisible()
+    {
+        foreach (Transform e in enemies)
+            if (IsVisible(e)) return true;
+        return false;
+    }
+
+    void UpdateEnemyStartPos()
+    {
+        enemiesSpawnMap.Clear();
+        foreach (Transform o in enemies)
+        {
+            enemiesSpawnMap[o]=(o.position);
+        }
+    }
+    void UpdateEnemyList()
+    {
+        enemies.Clear();
+        GameObject[] objs = GameObject.FindGameObjectsWithTag("Enemy");
+        foreach (var o in objs)
+            enemies.Add(o.transform);
+    }
+    void LogTensorBoardStats()
+    {
+        if (totalEpisodes == 0) return;
+
+        float accuracy = totalShots > 0 ? (float)totalHits / totalShots : 0f;
+        float meanSurvivalTime = ((float)totalStepsAlive / totalEpisodes) / maxEpisodeSteps;
+        float finalScore = accuracy * meanSurvivalTime;
+
+        var stats = Academy.Instance.StatsRecorder;
+
+        stats.Add("Eval/Accuracy", accuracy);
+        stats.Add("Eval/MeanSurvivalTime", meanSurvivalTime);
+        stats.Add("Eval/FinalScore", finalScore);
+        stats.Add("Eval/Shots", totalShots);
+        stats.Add("Eval/Hits", totalHits);
+    }
+
 }

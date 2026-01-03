@@ -7,6 +7,7 @@ public class Bullet : MonoBehaviour
 {
     public GameObject impactEffect;
     public ShooterAgentContinuous playerAgent;
+    bool hit = false;
 
     public void Init(ShooterAgentContinuous agent)
     {
@@ -15,12 +16,15 @@ public class Bullet : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
+        if (hit) return;
+
+        hit =true;
         GameObject impact = Instantiate(impactEffect, transform.position, Quaternion.identity);
         Destroy(impact, 0.3f);
 
         if (playerAgent!=null && collision.collider.tag == "Enemy")
         {
-            playerAgent.OnEnemyHit();
+            playerAgent.OnEnemyHit(collision.collider.transform);
         }
 
         Destroy(gameObject);
